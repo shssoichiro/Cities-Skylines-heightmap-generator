@@ -19,9 +19,9 @@ const sharpenKernel = [
   [-0.00391, -0.01563, -0.02344, -0.01563, -0.00391],
 ];
 
-var vmapSize = 18.144;
-var mapSize = 17.28;
-var tileSize = 1.92;
+var mapSize = 12.6;
+var vmapSize = mapSize * 1.05;
+var tileSize = 0.6;
 
 var grid = loadSettings();
 
@@ -147,12 +147,12 @@ function addSource() {
 
   map.addSource("playable", {
     type: "geojson",
-    data: getGrid(grid.lng, grid.lat, (vmapSize / 9) * 5),
+    data: getGrid(grid.lng, grid.lat, vmapSize),
   });
 
   map.addSource("start", {
     type: "geojson",
-    data: getGrid(grid.lng, grid.lat, vmapSize / 9),
+    data: getGrid(grid.lng, grid.lat, (vmapSize / 21) * 2),
   });
 
   map.addSource("mapbox-streets", {
@@ -389,8 +389,8 @@ function hideDebugLayer() {
 
 function setGrid(lng, lat, size) {
   map.getSource("grid").setData(getGrid(lng, lat, size));
-  map.getSource("start").setData(getGrid(lng, lat, size / 9));
-  map.getSource("playable").setData(getGrid(lng, lat, (size / 9) * 5));
+  map.getSource("start").setData(getGrid(lng, lat, size));
+  map.getSource("playable").setData(getGrid(lng, lat, (size / 21) * 2));
   grid.zoom = map.getZoom();
 }
 
@@ -634,7 +634,7 @@ function calcMinMaxHeight(map) {
 }
 
 function updateInfopanel() {
-  let rhs = (17.28 / mapSize) * 100;
+  let rhs = (12.6 / mapSize) * 100;
 
   document.getElementById("rHeightscale").innerHTML = rhs.toFixed(1);
   document.getElementById("lng").innerHTML = grid.lng.toFixed(5);
@@ -654,7 +654,7 @@ function zoomOut() {
 function changeMapsize(el) {
   mapSize = el.value / 1;
   vmapSize = mapSize * 1.05;
-  tileSize = mapSize / 9;
+  tileSize = mapSize / 21;
   setGrid(grid.lng, grid.lat, vmapSize);
 
   grid.minHeight = null;
@@ -681,17 +681,17 @@ function setHeightScale() {
       getHeightmap(2, resolve);
     }).then(() => {
       scope.heightScale = Math.min(
-        250,
+        100,
         Math.floor(
-          ((1024 - scope.waterDepth) / (grid.maxHeight - scope.baseLevel)) * 100
+          ((2048 - scope.waterDepth) / (grid.maxHeight - scope.baseLevel)) * 100
         )
       );
     });
   } else {
     scope.heightScale = Math.min(
-      250,
+      100,
       Math.floor(
-        ((1024 - scope.waterDepth) / (grid.maxHeight - scope.baseLevel)) * 100
+        ((2048 - scope.waterDepth) / (grid.maxHeight - scope.baseLevel)) * 100
       )
     );
   }
@@ -711,7 +711,7 @@ function getHeightmap(mode = 0, callback) {
 
   // get the extent of the current map
   // in heightmap, each pixel is treated as vertex data, and 1081px represents 1080 faces
-  // therefore, "1px = 16m" when the map size is 17.28km
+  // therefore, "1px = 16m" when the map size is 12.6km
   let extent = getExtent(grid.lng, grid.lat, (mapSize / 1080) * 1081);
 
   // zoom is 13 in principle
@@ -1002,12 +1002,12 @@ async function getMapImage() {
 }
 
 function autoSettings(withMap = true) {
-  scope.mapSize = 17.28;
+  scope.mapSize = 12.6;
   scope.waterDepth = defaultWaterdepth;
 
   mapSize = scope.mapSize / 1;
   vmapSize = mapSize * 1.05;
-  tileSize = mapSize / 9;
+  tileSize = mapSize / 21;
 
   if (withMap) {
     new Promise((resolve) => {
@@ -1015,9 +1015,9 @@ function autoSettings(withMap = true) {
     }).then(() => {
       scope.baseLevel = grid.minHeight;
       scope.heightScale = Math.min(
-        250,
+        100,
         Math.floor(
-          ((1024 - scope.waterDepth) / (grid.maxHeight - scope.baseLevel)) * 100
+          ((2048 - scope.waterDepth) / (grid.maxHeight - scope.baseLevel)) * 100
         )
       );
     });
@@ -1393,7 +1393,7 @@ function toHeightmap(tiles, distance) {
   let srcMap = Create2DArray(tileNum * 512, 0);
 
   // in heightmap, each pixel is treated as vertex data, and 1081px represents 1080 faces
-  // therefore, "1px = 16m" when the map size is 17.28km
+  // therefore, "1px = 16m" when the map size is 12.6km
   let heightmap = Create2DArray(Math.ceil(1080 * (distance / mapSize)), 0);
   let smSize = srcMap.length;
   let hmSize = heightmap.length;
@@ -1501,7 +1501,7 @@ function toCitiesmap(heightmap, watermap) {
       // raise the land by the amount of water depth
       // a height lower than baselevel is considered to be the below sea level and the height is set to 0
       // water depth is unaffected by height scale
-      // the map is unscaled at this point, so high mountains above 1024 meter can be present
+      // the map is unscaled at this point, so high mountains above 2048 meter can be present
       let calcHeight =
         (height + Math.round(waterDepth * 10 * watermap[y][x])) / 10;
       workingmap[y][x] = Math.max(0, calcHeight);
