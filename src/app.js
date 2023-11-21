@@ -714,8 +714,8 @@ function getHeightmap(mode = 0, callback) {
   // therefore, "1px = 16m" when the map size is 12.6km
   let extent = getExtent(grid.lng, grid.lat, (mapSize / 4095) * 4096);
 
-  // zoom is 13 in principle
-  let zoom = 13;
+  // zoom is 15 in principle
+  let zoom = 15;
 
   incPb(pbElement);
   // get a tile that covers the top left and bottom right (for the tile count calculation)
@@ -727,11 +727,11 @@ function getHeightmap(mode = 0, callback) {
   // get the required tile count in Zoom 13
   let tileCnt = Math.max(x2 - x + 1, y2 - y + 1);
 
-  // fixed in high latitudes: adjusted the tile count to 6 or less
+  // fixed in high latitudes: adjusted the tile count to 24 or less
   // because Terrain RGB tile distance depends on latitude
   // don't need too many tiles
   incPb(pbElement);
-  if (tileCnt > 6) {
+  if (tileCnt > 24) {
     let z = zoom;
     let tx, ty, tx2, ty2, tc;
     do {
@@ -1418,13 +1418,12 @@ function toHeightmap(tiles, distance) {
       }
     }
   }
-  srcMap = enlargeSrcMap(srcMap);
 
   // bilinear interpolation
   let hmIndex = Array(hmSize);
 
   for (let i = 0; i < hmSize; i++) {
-    hmIndex[i] = i / r;
+    hmIndex[i] = Math.min(i / r, srcMap.length - 2);
   }
   for (let i = 0; i < hmSize; i++) {
     for (let j = 0; j < hmSize; j++) {
@@ -1586,7 +1585,7 @@ function toCitiesmap(heightmap, watermap) {
       // get the value in 1/10meyers and scale and convert to cities skylines 16 bit int
       let h =
         Math.round(
-          (workingmap[y][x] / 100) * parseFloat(scope.heightScale) + 120
+          (workingmap[y][x] / 100) * parseFloat(scope.heightScale) + 124
         ) / 8;
 
       if (h > 65535) h = 65535;
@@ -1768,19 +1767,4 @@ function getInfo(fileName) {
     grid.zoom +
     "\n"
   );
-}
-
-// Very simple resize. Could be improved to get smoother resolution.
-function enlargeSrcMap(srcMap) {
-  let result = Create2DArray(srcMap.length * 4, 0);
-  for (let i = 0; i < srcMap.length; i++) {
-    for (let j = 0; j < srcMap.length; j++) {
-      for (let k = 0; k < 4; k++) {
-        for (let l = 0; l < 4; l++) {
-          result[i * 4 + k][j * 4 + l] = srcMap[i][j];
-        }
-      }
-    }
-  }
-  return result;
 }
