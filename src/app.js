@@ -390,7 +390,7 @@ function hideDebugLayer() {
 function setGrid(lng, lat, size) {
   map.getSource("grid").setData(getGrid(lng, lat, size));
   map.getSource("start").setData(getGrid(lng, lat, size));
-  map.getSource("playable").setData(getGrid(lng, lat, (size / 21) * 2));
+  map.getSource("playable").setData(getGrid(lng, lat, size));
   grid.zoom = map.getZoom();
 }
 
