@@ -20,7 +20,7 @@ const sharpenKernel = [
 ];
 
 var mapSize = 12.6;
-var vmapSize = mapSize * 1.05;
+var vmapSize = mapSize;
 var tileSize = 0.6;
 
 var grid = loadSettings();
@@ -881,9 +881,15 @@ function getHeightmap(mode = 0, callback) {
           // never draw a grid on a raw heightmap
           let savedDrawGrid = document.getElementById("drawGrid").checked;
           document.getElementById("drawGrid").checked = false;
+          // same with marker
+          let savedMarker = document.getElementById("drawMarker").checked;
+          document.getElementById("drawMarker").checked = false;
+
           citiesmap = toCitiesmap(sanatizedMap, watermap);
           download("heightmap.raw", citiesmap);
+
           document.getElementById("drawGrid").checked = savedDrawGrid;
+          document.getElementById("drawMarker").checked = savedMarker;
           break;
         case 1:
           citiesmap = toCitiesmap(sanatizedMap, watermap);
@@ -1026,9 +1032,6 @@ function autoSettings(withMap = true) {
   setGrid(grid.lng, grid.lat, vmapSize);
 
   document.getElementById("drawStrm").checked = true;
-
-  document.getElementById("drawMarker").checked = true;
-  document.getElementById("drawGrid").checked = true;
 
   document.getElementById("plainsHeight").value = Math.round(
     (grid.minHeight + grid.maxHeight) / 2
