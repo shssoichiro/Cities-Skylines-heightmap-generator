@@ -652,8 +652,8 @@ function zoomOut() {
 }
 
 function changeMapsize(el) {
-  mapSize = el.value / 1;
-  vmapSize = mapSize * 1.05;
+  mapSize = el.value;
+  vmapSize = mapSize;
   tileSize = mapSize / 21;
   setGrid(grid.lng, grid.lat, vmapSize);
 
@@ -885,14 +885,14 @@ function getHeightmap(mode = 0, callback) {
           let savedMarker = document.getElementById("drawMarker").checked;
           document.getElementById("drawMarker").checked = false;
 
-          citiesmap = toCitiesmap(sanatizedMap, watermap);
+          citiesmap = toCitiesmap(sanatizedMap, watermap, true);
           download("heightmap.raw", citiesmap);
 
           document.getElementById("drawGrid").checked = savedDrawGrid;
           document.getElementById("drawMarker").checked = savedMarker;
           break;
         case 1:
-          citiesmap = toCitiesmap(sanatizedMap, watermap);
+          citiesmap = toCitiesmap(sanatizedMap, watermap, false);
           png = UPNG.encodeLL([citiesmap], 4096, 4096, 1, 0, 16);
           download("heightmap.png", png);
           break;
@@ -900,7 +900,7 @@ function getHeightmap(mode = 0, callback) {
           updateInfopanel();
           break;
         case 3:
-          citiesmap = toCitiesmap(sanatizedMap, watermap);
+          citiesmap = toCitiesmap(sanatizedMap, watermap, false);
           png = UPNG.encodeLL([citiesmap], 4096, 4096, 1, 0, 16);
           downloadAsZip(png, 1);
           break;
@@ -1011,8 +1011,8 @@ function autoSettings(withMap = true) {
   scope.mapSize = 12.6;
   scope.waterDepth = defaultWaterdepth;
 
-  mapSize = scope.mapSize / 1;
-  vmapSize = mapSize * 1.05;
+  mapSize = scope.mapSize;
+  vmapSize = mapSize;
   tileSize = mapSize / 21;
 
   if (withMap) {
@@ -1481,7 +1481,7 @@ function toTerrainRGB(heightmap) {
   return canvas;
 }
 
-function toCitiesmap(heightmap, watermap) {
+function toCitiesmap(heightmap, watermap, forCS2) {
   const citiesmapSize = 4096;
 
   // cities has L/H byte order
@@ -1591,7 +1591,13 @@ function toCitiesmap(heightmap, watermap) {
       if (h > 65535) h = 65535;
 
       // calculate index in image
-      let index = y * citiesmapSize * 2 + x * 2;
+      let index;
+      if (forCS2) {
+        // For some ridiculous reason, it is flipped in CS2
+        index = (citiesmapSize - y) * citiesmapSize * 2 + x * 2;
+      } else {
+        index = y * citiesmapSize * 2 + x * 2;
+      }
 
       // cities used hi/low 16 bit
       citiesmap[index + 0] = h >> 8;
