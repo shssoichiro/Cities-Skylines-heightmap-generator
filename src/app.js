@@ -1399,8 +1399,6 @@ function toHeightmap(tiles, distance) {
   let smSize = srcMap.length;
   let hmSize = heightmap.length;
   let r = (hmSize - 1) / (smSize - 1);
-  console.log("srcMap", srcMap);
-  console.log("heightmap", heightmap);
 
   for (let i = 0; i < tileNum; i++) {
     for (let j = 0; j < tileNum; j++) {
@@ -1584,7 +1582,7 @@ function toCitiesmap(heightmap, watermap) {
     for (let x = 0; x < citiesmapSize; x++) {
       // get the value in 1/10meyers and scale and convert to cities skylines 16 bit int
       let h = Math.round(
-        ((workingmap[y][x] / 100) * parseFloat(scope.heightScale)) / 0.015625
+        (workingmap[y][x] / 100) * parseFloat(scope.heightScale)
       );
 
       if (h > 65535) h = 65535;
