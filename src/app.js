@@ -2,7 +2,7 @@
 
 "use strict";
 
-const defaultWaterdepth = 40;
+const defaultWaterdepth = 10;
 
 // see: https://www.taylorpetrick.com/blog/post/convolution-part3
 const meanKernel = [
@@ -450,7 +450,7 @@ function loadSettings() {
   document.getElementById("plainsHeight").value =
     parseInt(stored.plainsHeight) || 140;
   document.getElementById("streamDepth").value =
-    parseInt(stored.streamDepth) || 140;
+    parseInt(stored.streamDepth) || 3;
 
   return stored;
 }
@@ -1033,7 +1033,7 @@ function autoSettings(withMap = true) {
   document.getElementById("plainsHeight").value = 140;
   document.getElementById("blurPasses").value = 10;
   document.getElementById("blurPostPasses").value = 2;
-  document.getElementById("streamDepth").value = 7;
+  document.getElementById("streamDepth").value = 3;
 }
 
 function isDownloadComplete(tiles, vTiles) {
