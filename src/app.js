@@ -1033,9 +1033,7 @@ function autoSettings(withMap = true) {
 
   document.getElementById("drawStrm").checked = true;
 
-  document.getElementById("plainsHeight").value = Math.round(
-    (grid.minHeight + grid.maxHeight) / 2
-  );
+  document.getElementById("plainsHeight").value = 140;
   document.getElementById("blurPasses").value = 10;
   document.getElementById("blurPostPasses").value = 2;
   document.getElementById("streamDepth").value = 3;
