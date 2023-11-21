@@ -1395,8 +1395,7 @@ function levelMap(map, min, max, style) {
 
 function toHeightmap(tiles, distance) {
   let tileNum = tiles.length;
-  let srcMap = Create2DArray(tileNum * 2048, 0);
-  console.log("tileNum", tileNum);
+  let srcMap = Create2DArray(tileNum * 512, 0);
 
   // in heightmap, each pixel is treated as vertex data, and 4096px represents 4095 faces
   // therefore, "1px = 16m" when the map size is 12.6km
@@ -1408,11 +1407,11 @@ function toHeightmap(tiles, distance) {
   for (let i = 0; i < tileNum; i++) {
     for (let j = 0; j < tileNum; j++) {
       let tile = new Uint8Array(UPNG.toRGBA8(tiles[i][j])[0]);
-      for (let y = 0; y < 2048; y++) {
-        for (let x = 0; x < 2048; x++) {
-          let tileIndex = y * 2048 * 4 + x * 4;
+      for (let y = 0; y < 512; y++) {
+        for (let x = 0; x < 512; x++) {
+          let tileIndex = y * 512 * 4 + x * 4;
           // resolution 0.1 meters
-          srcMap[i * 2048 + y][j * 2048 + x] =
+          srcMap[i * 512 + y][j * 512 + x] =
             -100000 +
             (tile[tileIndex] * 256 * 256 +
               tile[tileIndex + 1] * 256 +
@@ -1421,15 +1420,16 @@ function toHeightmap(tiles, distance) {
       }
     }
   }
+  srcMap = enlargeSrcMap(srcMap);
 
   // bilinear interpolation
   let hmIndex = Array(hmSize);
 
   for (let i = 0; i < hmSize; i++) {
-    hmIndex[i] = r > i ? i / r : r / i;
+    hmIndex[i] = i / r;
   }
-  for (let i = 0; i < hmSize - 1; i++) {
-    for (let j = 0; j < hmSize - 1; j++) {
+  for (let i = 0; i < hmSize; i++) {
+    for (let j = 0; j < hmSize; j++) {
       let y0 = Math.floor(hmIndex[i]);
       let x0 = Math.floor(hmIndex[j]);
       let y1 = y0 + 1;
@@ -1586,9 +1586,10 @@ function toCitiesmap(heightmap, watermap) {
   for (let y = 0; y < citiesmapSize; y++) {
     for (let x = 0; x < citiesmapSize; x++) {
       // get the value in 1/10meyers and scale and convert to cities skylines 16 bit int
-      let h = Math.round(
-        (workingmap[y][x] / 100) * parseFloat(scope.heightScale)
-      );
+      let h =
+        Math.round(
+          (workingmap[y][x] / 100) * parseFloat(scope.heightScale) + 120
+        ) / 8;
 
       if (h > 65535) h = 65535;
 
@@ -1769,4 +1770,19 @@ function getInfo(fileName) {
     grid.zoom +
     "\n"
   );
+}
+
+// Very simple resize. Could be improved to get smoother resolution.
+function enlargeSrcMap(srcMap) {
+  let result = Create2DArray(srcMap.length * 4, 0);
+  for (let i = 0; i < srcMap.length; i++) {
+    for (let j = 0; j < srcMap.length; j++) {
+      for (let k = 0; k < 4; k++) {
+        for (let l = 0; l < 4; l++) {
+          result[i * 4 + k][j * 4 + l] = srcMap[i][j];
+        }
+      }
+    }
+  }
+  return result;
 }
