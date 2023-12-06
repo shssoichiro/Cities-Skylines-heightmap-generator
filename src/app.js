@@ -577,12 +577,14 @@ function sanatizeMap(map, xOffset, yOffset) {
 
   // pass 1: normalize the map, and determine the lowestPositve
   for (let y = yOffset; y < yOffset + citiesmapSize; y++) {
-    for (let x = xOffset; x < xOffset + citiesmapSize; x++) {
-      let h = map[y][x];
-      if (h >= 0 && h < lowestPositve) {
-        lowestPositve = h;
+    if (map[y] !== undefined) {
+      for (let x = xOffset; x < xOffset + citiesmapSize; x++) {
+        let h = map[y][x];
+        if (h >= 0 && h < lowestPositve) {
+          lowestPositve = h;
+        }
+        sanatizedMap[y - yOffset][x - xOffset] = h;
       }
-      sanatizedMap[y - yOffset][x - xOffset] = h;
     }
   }
 
@@ -604,9 +606,11 @@ function sanatizeWatermap(map, xOffset, yOffset) {
   let watermap = Create2DArray(citiesmapSize, 0);
 
   for (let y = yOffset; y < yOffset + citiesmapSize; y++) {
-    for (let x = xOffset; x < yOffset + citiesmapSize; x++) {
-      let h = map[y][x];
-      watermap[y - yOffset][x - xOffset] = h;
+    if (map[y] !== undefined) {
+      for (let x = xOffset; x < yOffset + citiesmapSize; x++) {
+        let h = map[y][x];
+        watermap[y - yOffset][x - xOffset] = h;
+      }
     }
   }
 
@@ -1442,10 +1446,14 @@ function toHeightmap(tiles, distance) {
     }
   }
   for (let i = 0; i < hmSize; i++) {
-    heightmap[i][hmSize - 1] = srcMap[i][hmSize - 1];
+    if(srcMap[i] !== undefined) {
+      heightmap[i][hmSize - 1] = srcMap[i][hmSize - 1];
+    }
   }
   for (let j = 0; j < hmSize; j++) {
-    heightmap[hmSize - 1][j] = srcMap[hmSize - 1][j];
+    if (srcMap[hmSize - 1]) {
+      heightmap[hmSize - 1][j] = srcMap[hmSize - 1][j];
+    }
   }
 
   return heightmap;
